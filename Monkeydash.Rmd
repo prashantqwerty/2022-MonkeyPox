@@ -1,0 +1,83 @@
+---
+title: "2022 Monkeypox Outbreak"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+d <-read.csv("C:\\Users\\Rajesh\\Downloads\\Daily_Country_Wise_Confirmed_Cases.csv")
+d1 <-  d %>% pivot_longer( cols = 2:94, names_to ="Date",) 
+d2 <- read.csv("C:\\Users\\Rajesh\\Downloads\\Monkey_Pox_Cases_Worldwide.csv")
+d1$Date<-gsub("X","",as.character(d1$Date))
+
+d4 <-aggregate(d1$value, by=list(Date=d1$Date), FUN=sum)
+d5<- cumsum(d4$x)
+d4<-cbind(d4,d5)
+listfig <- select(d4,2:3)
+
+
+```
+
+Row {data-height=650}
+-----------------------------------------------------------------------
+
+### World View of Total Cases.
+
+```{r}
+p1 <- plot_ly ( d1, x = ~Date, y = ~Country, type = 'bar', color = ~value, colors = c("#2c7873","#004445", "#021c1e", "black" ),
+                text= ~paste("Country:", Country, '<br>Total:', value)) %>%
+  layout(plot_bgcolor='rgb(219, 226, 233)')%>%
+  layout(paper_bgcolor='rgb(219, 226https://plotly.com/, 233)')%>%
+  layout(xaxis=list(showticklabels= FALSE),yaxis= list(showticklabels= FALSE))
+ggplotly(p1)
+
+```
+
+### Total Aggregated
+
+```{r}
+ fig4 <-  plot_ly(d4, x = ~Date, y = ~x, name = 'Daily Change', type = 'scatter', mode = 'lines+markers', color =listfig, colors = c("#2c7873","#004445"))
+ fig4 <- fig4 %>% add_trace(y = ~d5, name = 'Daily Total', mode = 'lines+markers',line=list(color='rgb(44,120,115)',dash='dashed'))  %>%
+   layout(plot_bgcolor='rgb(219, 226, 233)')%>%
+   layout(paper_bgcolor='rgb(219, 226, 233)')
+ ggplotly(fig4)
+```
+ 
+Row {.tabset}
+-----------------------------------------------------------------------
+
+
+### Total Cases vs Hospitalized patients
+
+```{r}
+fig <- plot_ly (d2, x = ~Confirmed_Cases,y= ~Hospitalized, color = ~Confirmed_Cases,
+   colors =c ("#2c7873" ,"black" ),text= ~paste("Country:", Country, '<br>TotalHospitalized:', Hospitalized, '<br>TotalConfirmed', Confirmed_Cases)) %>%
+  layout(plot_bgcolor='rgb(219, 226, 233)')%>%
+  layout(paper_bgcolor='rgb(219, 226, 233)')
+ggplotly(fig)
+
+```
+### Total Cases vs Suspected Patients
+
+```{r}
+fig2 <- plot_ly (d2, x = ~Confirmed_Cases,y= ~Suspected_Cases, color = ~Confirmed_Cases,
+                colors =c ("#2c7873" ,"black" ),text= ~paste("Country:", Country, '<br>TotalSuspected:', Suspected_Cases, '<br>TotalConfirmed', Confirmed_Cases)) %>%
+  layout(plot_bgcolor='rgb(219, 226, 233)')%>%
+  layout(paper_bgcolor='rgb(219, 226, 233)')
+
+ggplotly(fig2)
+```
+### Hospitalized vs Suspected Cases
+```{r}
+fig3 <- plot_ly (d2, x = ~Hospitalized,y= ~Suspected_Cases, color = ~Suspected_Cases,
+                 colors =c ("#2c7873" ,"black" ),text= ~paste("Country:", Country, '<br>TotalSuspected:', Suspected_Cases, '<br>TotaHospitalized', Hospitalized)) %>%
+  layout(plot_bgcolor='rgb(219, 226, 233)')%>%
+  layout(paper_bgcolor='rgb(219, 226, 233)')
+ggplotly(fig3)
+```
+
